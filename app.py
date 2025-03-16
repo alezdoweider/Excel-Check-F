@@ -31,14 +31,8 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
     word-wrap: break-word;
     white-space: normal;
 }
-
-/* Ajustar el ancho de la columna 'Nro. ID' */
-.stDataFrame tbody tr td:nth-child(3) {
-    width: 30px !important;  /* Ajusta el ancho de la columna 'Nro. ID' */
-}
 </style>
 """, unsafe_allow_html=True)
-}
 
 def main():
     st.title("Gestor de Casos (BlueStars)")
@@ -89,6 +83,18 @@ def main():
                 # Definir encabezados de la tabla (más la columna de TIPO ENVASE)
                 columnas_mostrar = ['CASO', 'ID', 'Nro. ID', 'TIPO DE EMP', 'NUNC', 'NOMBRE']
                 num_columnas = len(columnas_mostrar) + 1  # +1 para "TIPO ENVASE"
+
+                # Slider para ajustar el ancho de la columna 'Nro. ID'
+                ancho_nro_id = st.slider("Ajustar el ancho de la columna 'Nro. ID'", min_value=30, max_value=200, value=100)
+
+                # Estilo dinámico basado en el valor del slider
+                st.markdown(f"""
+                <style>
+                .stDataFrame tbody tr td:nth-child(3) {{
+                    width: {ancho_nro_id}px !important;
+                }}
+                </style>
+                """, unsafe_allow_html=True)
 
                 # Mostrar encabezados con bordes
                 header_cols = st.columns(num_columnas)
