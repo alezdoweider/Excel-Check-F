@@ -91,8 +91,18 @@ def main():
                         ws_lch = wb['LCH']
                         ws_lch['H9'] = custodio
                     
+                    # Guardar los cambios en el archivo
+                    file_stream.seek(0)
                     wb.save(file_stream)
                     st.success("Información guardada correctamente en el archivo.")
+                    
+                    # Descargar el archivo modificado
+                    st.download_button(
+                        label="Descargar archivo modificado",
+                        data=file_stream.getvalue(),
+                        file_name="archivo_modificado.xlsm",
+                        mime="application/vnd.ms-excel.sheet.macroEnabled.12"
+                    )
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
