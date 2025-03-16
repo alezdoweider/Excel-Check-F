@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
+import io
 
 # Configurar la página en modo ancho
 st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
@@ -38,7 +39,10 @@ def main():
     uploaded_file = st.file_uploader("Sube el archivo Excel (.xlsm)", type=["xlsm"])
     if uploaded_file:
         try:
-            wb = openpyxl.load_workbook(uploaded_file, keep_vba=True)
+            # Cargar el archivo en memoria para modificarlo
+            file_stream = io.BytesIO(uploaded_file.getvalue())
+            wb = openpyxl.load_workbook(file_stream, keep_vba=True)
+            
             if 'ARMADRE' not in wb.sheetnames:
                 st.error("La hoja 'ARMADRE' no se encuentra en el archivo.")
                 return
@@ -94,8 +98,19 @@ def main():
                         ws_lch = wb['LCH']
                         ws_lch['H9'] = custodio
                     
-                    wb.save(uploaded_file)
-                    st.success("Información guardada correctamente en el archivo BlueStars.")
+                    # Guardar los cambios en un nuevo archivo en memoria
+                    output_stream = io.BytesIO()
+                    wb.save(output_stream)
+                    output_stream.seek(0)
+                    
+                    # Permitir la descarga del archivo modificado
+                    st.download_button(
+                        label="Descargar archivo actualizado",
+                        data=output_stream,
+                        file_name="BlueStars_actualizado.xlsm",
+                        mime="application/vnd.ms-excel.sheet.macroEnabled.12"
+                    )
+                    st.success("Información guardada correctamente. Descarga el archivo actualizado.")
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
