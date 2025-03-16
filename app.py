@@ -32,13 +32,12 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
     white-space: normal;
 }
 
-/* Establecer el ancho de la columna 'Nro. ID' a 30px */
-.stDataFrame tbody tr td:nth-child(3) {
+/* Establecer el ancho de la columna 'Nro. ID' en la columna F (índice 5) a 30px */
+.stDataFrame tbody tr td:nth-child(6) {
     width: 30px !important;
 }
 </style>
 """, unsafe_allow_html=True)
-
 def main():
     st.title("Gestor de Casos (BlueStars)")
 
