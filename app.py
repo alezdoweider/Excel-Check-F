@@ -16,6 +16,7 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
 </style>
 """, unsafe_allow_html=True)
 
+
 def main():
     st.title("Gestor de Casos (BlueStars)")
 
@@ -67,28 +68,46 @@ def main():
                 # Reseteamos el índice para iterar más fácilmente
                 df_filtrado.reset_index(drop=True, inplace=True)
 
-                st.write("### Selecciona un tipo de envase para cada fila:")
+                # Opciones de envase
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
 
-                # Creamos un selectbox por cada fila
-                for idx, row in df_filtrado.iterrows():
-                    # Si ya elegimos algo antes para esta fila, lo recordamos; si no, usamos la primera opción
-                    default_value = st.session_state.get(f"envase_{idx}", envase_options[0])
-                    chosen_envase = st.selectbox(
-                        f"Tipo de Envase (Fila {idx+1})",
-                        envase_options,
-                        key=f"envase_select_{idx}",
-                        index=envase_options.index(default_value) if default_value in envase_options else 0
-                    )
-                    # Guardamos la selección en session_state para persistir
-                    st.session_state[f"envase_{idx}"] = chosen_envase
-
-                # Ahora creamos la columna "TIPO ENVASE" en df_filtrado
-                df_filtrado["TIPO ENVASE"] = [
-                    st.session_state.get(f"envase_{idx}", envase_options[0]) for idx in df_filtrado.index
+                # Mostrar tabla con selectbox integrado en cada fila
+                st.write("### Tabla de datos con selección de tipo de envase:")
+                columnas_mostrar = [
+                    'CASO',
+                    'ID',
+                    'NUMERO DEL ID',
+                    'TIPO DE EMP',
+                    'NUNC',
+                    'EMPs'
                 ]
 
-                # Columnas finales a mostrar
+                # Encabezados
+                cols = st.columns(len(columnas_mostrar) + 1)  # +1 para el selectbox de 'TIPO ENVASE'
+                for idx, col_name in enumerate(columnas_mostrar):
+                    cols[idx].markdown(f"**{col_name}**")
+                cols[-1].markdown("**TIPO ENVASE**")
+
+                # Fila por fila con selectbox
+                tipo_envase_seleccionado = []  # Para guardar lo que el usuario selecciona
+                for idx, row in df_filtrado.iterrows():
+                    cols = st.columns(len(columnas_mostrar) + 1)
+                    for j, col_name in enumerate(columnas_mostrar):
+                        cols[j].markdown(str(row[col_name]))
+                    
+                    # Selectbox en la misma fila
+                    selected_envase = cols[-1].selectbox(
+                        " ",
+                        envase_options,
+                        key=f"envase_fila_{idx}"
+                    )
+                    tipo_envase_seleccionado.append(selected_envase)
+
+                # Agregar la columna "TIPO ENVASE" al DataFrame filtrado
+                df_filtrado['TIPO ENVASE'] = tipo_envase_seleccionado
+
+                # Mostrar DataFrame final
+                st.write("### Resultado final con Tipo de Envase seleccionado:")
                 columnas_finales = [
                     'CASO',
                     'ID',
@@ -98,11 +117,11 @@ def main():
                     'EMPs',
                     'TIPO ENVASE'
                 ]
-
                 st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
 
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
+
 
 if __name__ == "__main__":
     main()
