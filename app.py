@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import openpyxl
 
 # Configurar la página en modo ancho
 st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
@@ -77,20 +78,22 @@ def main():
                 dia = st.text_input("Ingrese el DÍA:")
                 custodio = st.text_input("Ingrese el CUSTODIO:")
 
-                output = io.BytesIO()
-                with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                    df_filtrado[columnas_finales].to_excel(writer, index=False)
-                    wb = writer.book
-                    if 'HT' in wb.sheetnames:
-                        ws = wb['HT']
-                        ws['AA7'] = anio
-                        ws['AE7'] = mes
-                        ws['AG7'] = dia
-                        ws['AE11'] = custodio
-                    if 'LCH' in wb.sheetnames:
-                        ws = wb['LCH']
-                        ws['H9'] = custodio
-                output.seek(0)
+                if st.button("Guardar Información"):
+                    output = io.BytesIO()
+                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                        df_filtrado[columnas_finales].to_excel(writer, index=False)
+                        wb = writer.book
+                        if 'HT' in wb.sheetnames:
+                            ws = wb['HT']
+                            ws['AA7'] = anio
+                            ws['AE7'] = mes
+                            ws['AG7'] = dia
+                            ws['AE11'] = custodio
+                        if 'LCH' in wb.sheetnames:
+                            ws = wb['LCH']
+                            ws['H9'] = custodio
+                    output.seek(0)
+                    st.success("Información guardada correctamente en el archivo Excel.")
 
                 st.download_button(
                     label="Descargar tabla como Excel",
