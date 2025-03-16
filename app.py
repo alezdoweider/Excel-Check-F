@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-st.title("Consulta de BlueStars")
+st.title("Consulta de BlueStars - Filtrar por CASO")
 
 # Subir archivo Excel (xlsm o xlsx)
 uploaded_file = st.file_uploader("Selecciona el archivo BlueStars", type=["xlsm", "xlsx"])
@@ -29,10 +29,10 @@ if uploaded_file is not None:
         columnas_interes = ["CASO", "NUNC", "NOMBRE", "ID EMP", "Nro. ID", "TIPO EMP"]
         df_procesado = df[columnas_interes].copy()
         
-        # 5. (Opcional) Agregar un filtro de consulta por NOMBRE
-        filtro_nombre = st.text_input("Filtrar por NOMBRE (contiene):")
-        if filtro_nombre:
-            df_filtrado = df_procesado[df_procesado["NOMBRE"].astype(str).str.contains(filtro_nombre, case=False)]
+        # 5. Filtrar por CASO
+        filtro_caso = st.text_input("Filtrar por CASO (contiene):")
+        if filtro_caso:
+            df_filtrado = df_procesado[df_procesado["CASO"].astype(str).str.contains(filtro_caso, case=False, na=False)]
             st.write("Resultados filtrados:")
             st.dataframe(df_filtrado)
         else:
