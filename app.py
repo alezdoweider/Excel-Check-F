@@ -71,16 +71,13 @@ def main():
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
                 
-                # Mostrar la tabla con el selectbox dentro de la columna 'TIPO DE ENVASE'
-                for i in range(len(df_filtrado)):
-                    df_filtrado.at[i, 'TIPO DE ENVASE'] = st.selectbox(
-                        " ", envase_options, key=f"envase_{i}", index=0
-                    )
-                
+                # Mostrar la tabla con selectbox solo en la columna 'TIPO DE ENVASE'
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
+                df_filtrado['TIPO DE ENVASE'] = ""
+                
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
-                st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
-
+                edited_df = st.data_editor(df_filtrado[columnas_finales], use_container_width=True, num_rows="dynamic")
+                
                 # Ajustar ancho de la columna 'NRO ID'
                 if 'ARMADRE' in wb.sheetnames:
                     ws_armadre = wb['ARMADRE']
