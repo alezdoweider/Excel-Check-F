@@ -31,6 +31,11 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
     word-wrap: break-word;
     white-space: normal;
 }
+
+/* Establecer el ancho de la columna 'Nro. ID' a 30px */
+.stDataFrame tbody tr td:nth-child(3) {
+    width: 30px !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -84,18 +89,6 @@ def main():
                 columnas_mostrar = ['CASO', 'ID', 'Nro. ID', 'TIPO DE EMP', 'NUNC', 'NOMBRE']
                 num_columnas = len(columnas_mostrar) + 1  # +1 para "TIPO ENVASE"
 
-                # Slider para ajustar el ancho de la columna 'Nro. ID'
-                ancho_nro_id = st.slider("Ajustar el ancho de la columna 'Nro. ID'", min_value=30, max_value=200, value=100)
-
-                # Estilo dinámico basado en el valor del slider
-                st.markdown(f"""
-                <style>
-                .stDataFrame tbody tr td:nth-child(3) {{
-                    width: {ancho_nro_id}px !important;
-                }}
-                </style>
-                """, unsafe_allow_html=True)
-
                 # Mostrar encabezados con bordes
                 header_cols = st.columns(num_columnas)
                 for idx, col_name in enumerate(columnas_mostrar):
@@ -145,6 +138,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 # Cargar el archivo Excel
 archivo = 'BlueStars.xlsm'  # Aquí pones la ruta de tu archivo
 wb = openpyxl.load_workbook(archivo)
