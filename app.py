@@ -4,17 +4,23 @@ import pandas as pd
 # Configurar la página en modo ancho
 st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
 
-# Fondo negro y texto blanco + bordes para tabla
+# Fondo negro, texto blanco y estilos para la tabla con autoajuste y bordes
 st.markdown("""
 <style>
 body { background-color: black; color: white; }
 .stApp { background-color: black; color: white; }
 [data-testid="stSidebar"] { background-color: #222222; }
-h1, h2, h3, h4, h5, h6, label, p, div, span { color: white !important; }
+h1, h2, h3, h4, h5, h6, label, p, div, span {
+  color: white !important;
+}
+
+/* Estilos para la cuadrícula de la tabla */
 .table-cell {
     border: 1px solid white;
     padding: 5px;
     text-align: center;
+    word-wrap: break-word;
+    white-space: normal;
 }
 .table-header {
     border: 2px solid white;
@@ -22,10 +28,11 @@ h1, h2, h3, h4, h5, h6, label, p, div, span { color: white !important; }
     font-weight: bold;
     background-color: #444;
     text-align: center;
+    word-wrap: break-word;
+    white-space: normal;
 }
 </style>
 """, unsafe_allow_html=True)
-
 
 def main():
     st.title("Gestor de Casos (BlueStars)")
@@ -34,50 +41,61 @@ def main():
     uploaded_file = st.file_uploader("Sube el archivo Excel (.xlsm)", type=["xlsm"])
     if uploaded_file:
         try:
-            # Leer la hoja ARMADRE
+            # Leer la hoja "ARMADRE" usando openpyxl
             df = pd.read_excel(uploaded_file, sheet_name='ARMADRE', engine='openpyxl')
             st.success("Archivo cargado correctamente")
 
-            # ================================
-            # Extraer datos usando índices:
-            # ================================
-            df['CASO'] = df.iloc[:, 16].astype(str).apply(lambda x: x.split('-')[0])  # Solo parte antes del guion
+            # Extraer datos usando índices numéricos:
+            # Columna Q (índice 16): 
+            # - CASO: solo la parte antes del guion
+            # - NUNC: la parte después del guion (si existe)
+            df['CASO'] = df.iloc[:, 16].astype(str).apply(lambda x: x.split('-')[0])
             df['NUNC'] = df.iloc[:, 16].apply(lambda x: str(x).split('-')[1] if '-' in str(x) else '')
+
+            # Columna E (índice 4): ID completo
             df['ID'] = df.iloc[:, 4].astype(str)
-            df['NUMERO DEL ID'] = df['ID'].apply(lambda x: x.split('/')[0] if '/' in x else x)
+
+            # Columna F (índice 5): NUMERO DEL ID (convertido a número)
+            df['NUMERO DEL ID'] = pd.to_numeric(df.iloc[:, 5], errors='coerce')
+
+            # Columna H (índice 7): TIPO DE EMP
             df['TIPO DE EMP'] = df.iloc[:, 7].astype(str)
+
+            # Columna K (índice 10): EMPs
             df['EMPs'] = df.iloc[:, 10].astype(str)
 
+            # Lista de CASOS únicos (según la columna 'CASO')
             lista_casos = df['CASO'].dropna().unique().tolist()
             if not lista_casos:
                 st.warning("No se encontraron valores en la columna Q para generar la lista de casos.")
                 return
 
+            # Seleccionar un CASO
             caso_seleccionado = st.selectbox("Selecciona un CASO:", lista_casos)
             if caso_seleccionado:
                 st.subheader(f"Información del CASO: {caso_seleccionado}")
                 df_filtrado = df[df['CASO'] == caso_seleccionado].copy()
                 df_filtrado.reset_index(drop=True, inplace=True)
 
+                # Opciones de envase disponibles
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
 
-                # Mostrar encabezados con bordes
+                # Definir encabezados de la tabla (más la columna de TIPO ENVASE)
                 columnas_mostrar = ['CASO', 'ID', 'NUMERO DEL ID', 'TIPO DE EMP', 'NUNC', 'EMPs']
-                num_columnas = len(columnas_mostrar) + 1  # +1 para 'TIPO ENVASE'
+                num_columnas = len(columnas_mostrar) + 1  # +1 para "TIPO ENVASE"
 
+                # Mostrar encabezados con bordes
                 header_cols = st.columns(num_columnas)
                 for idx, col_name in enumerate(columnas_mostrar):
                     header_cols[idx].markdown(f'<div class="table-header">{col_name}</div>', unsafe_allow_html=True)
                 header_cols[-1].markdown(f'<div class="table-header">TIPO ENVASE</div>', unsafe_allow_html=True)
 
+                # Mostrar cada fila con su selectbox integrado en la última columna
                 tipo_envase_seleccionado = []
-
-                # Mostrar filas con cuadrícula
                 for idx, row in df_filtrado.iterrows():
                     row_cols = st.columns(num_columnas)
                     for j, col_name in enumerate(columnas_mostrar):
                         row_cols[j].markdown(f'<div class="table-cell">{row[col_name]}</div>', unsafe_allow_html=True)
-
                     selected_envase = row_cols[-1].selectbox(
                         " ",
                         envase_options,
@@ -85,17 +103,23 @@ def main():
                     )
                     tipo_envase_seleccionado.append(selected_envase)
 
-                # Agregar columna final
+                # Agregar la columna "TIPO ENVASE" con las selecciones del usuario
                 df_filtrado['TIPO ENVASE'] = tipo_envase_seleccionado
 
-                # Mostrar DataFrame final
-                st.write("### Resultado final con Tipo de Envase seleccionado:")
+                # Mostrar DataFrame final con todas las columnas deseadas
                 columnas_finales = [
-                    'CASO', 'ID', 'NUMERO DEL ID', 'TIPO DE EMP', 'NUNC', 'EMPs', 'TIPO ENVASE'
+                    'CASO',
+                    'ID',
+                    'NUMERO DEL ID',
+                    'TIPO DE EMP',
+                    'NUNC',
+                    'EMPs',
+                    'TIPO ENVASE'
                 ]
+                st.write("### Resultado final con Tipo de Envase seleccionado:")
                 st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
 
-                # ✅ Opción para descargar como Excel
+                # Opción para descargar el DataFrame final como Excel
                 output = df_filtrado[columnas_finales].to_excel(index=False, engine='openpyxl')
                 st.download_button(
                     label="Descargar tabla como Excel",
@@ -106,7 +130,6 @@ def main():
 
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
-
 
 if __name__ == "__main__":
     main()
