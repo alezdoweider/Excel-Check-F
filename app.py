@@ -110,10 +110,10 @@ def main():
                 columnas_finales = [
                     'CASO',
                     'ID',
-                    'NUMERO DEL ID',
+                    '# ID',
                     'TIPO DE EMP',
                     'NUNC',
-                    'EMPs',
+                    'VICTIMA',
                     'TIPO ENVASE'
                 ]
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
