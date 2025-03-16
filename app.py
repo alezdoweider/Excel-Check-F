@@ -56,13 +56,13 @@ def main():
             df['ID'] = df.iloc[:, 4].astype(str)
 
             # Columna F (índice 5): NUMERO DEL ID (convertido a número)
-            df['NUMERO DEL ID'] = pd.to_numeric(df.iloc[:, 5], errors='coerce')
+            df['Nro. ID'] = pd.to_numeric(df.iloc[:, 5], errors='coerce')
 
             # Columna H (índice 7): TIPO DE EMP
             df['TIPO DE EMP'] = df.iloc[:, 7].astype(str)
 
             # Columna K (índice 10): EMPs
-            df['EMPs'] = df.iloc[:, 10].astype(str)
+            df['VICTIMA'] = df.iloc[:, 10].astype(str)
 
             # Lista de CASOS únicos (según la columna 'CASO')
             lista_casos = df['CASO'].dropna().unique().tolist()
