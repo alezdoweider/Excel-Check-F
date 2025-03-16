@@ -31,6 +31,11 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
     word-wrap: break-word;
     white-space: normal;
 }
+
+/* Ajustar el ancho de la columna 'Nro. ID' */
+.stDataFrame tbody tr td:nth-child(3) {
+    width: 50px !important;  /* Ajusta el ancho de la columna 'Nro. ID' */
+}
 </style>
 """, unsafe_allow_html=True)
 
@@ -133,6 +138,8 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
 # Cargar el archivo Excel
 archivo = 'BlueStars.xlsm'  # Aquí pones la ruta de tu archivo
 wb = openpyxl.load_workbook(archivo)
