@@ -121,3 +121,4 @@ def main():
             st.error(f"Error al leer el archivo: {e}")
 
 if __name__ == "__main__":
+ main()
