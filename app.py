@@ -1,4 +1,4 @@
-import streamlit as st
+ import streamlit as st
 import pandas as pd
 import io
 
@@ -49,8 +49,8 @@ def main():
             df['CASO'] = df.iloc[:, 16].astype(str).apply(lambda x: x.split('-')[0])
             df['NUNC'] = df.iloc[:, 16].apply(lambda x: str(x).split('-')[1] if '-' in str(x) else '')
             df['NOMBRE'] = df.iloc[:, 10].astype(str)
-            df['ID'] = pd.to_numeric(df.iloc[:, 6], errors='coerce')
-            df['Nro ID'] = df.iloc[:, 5].astype(str)
+            df['ID'] = df.iloc[:, 4].astype(str)
+            df['NRO ID'] = pd.to_numeric(df.iloc[:, 5], errors='coerce')
             df['TIPO DE EMP'] = df.iloc[:, 7].astype(str)
 
             lista_casos = df['CASO'].dropna().unique().tolist()
@@ -65,9 +65,9 @@ def main():
                 df_filtrado.reset_index(drop=True, inplace=True)
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
-                df_filtrado['TIPO ENVASE'] = [st.selectbox(" ", envase_options, key=f"envase_{i}") for i in range(len(df_filtrado))]
+                df_filtrado['TIPO DE ENVASE'] = [st.selectbox(" ", envase_options, key=f"envase_{i}") for i in range(len(df_filtrado))]
                 
-                columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'Nro ID', 'TIPO DE EMP', 'TIPO ENVASE']
+                columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
                 st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
 
