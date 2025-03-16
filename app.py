@@ -71,15 +71,22 @@ def main():
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
                 
-                # Insertar la lista desplegable en la tabla dentro de la columna 'TIPO DE ENVASE'
-                df_filtrado['TIPO DE ENVASE'] = [
-                    st.selectbox(" ", envase_options, key=f"envase_{i}")
-                    for i in range(len(df_filtrado))
-                ]
+                # Convertir la columna 'TIPO DE ENVASE' en un dropdown dentro de la tabla
+                df_filtrado['TIPO DE ENVASE'] = df_filtrado['TIPO DE ENVASE'].astype(str)
+                edited_df = st.data_editor(
+                    df_filtrado,
+                    column_config={
+                        "TIPO DE ENVASE": st.column_config.SelectboxColumn(
+                            "TIPO DE ENVASE",
+                            options=envase_options
+                        )
+                    },
+                    use_container_width=True
+                )
                 
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
-                st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
+                st.dataframe(edited_df[columnas_finales], use_container_width=True)
 
                 # Ajustar ancho de la columna 'NRO ID'
                 if 'ARMADRE' in wb.sheetnames:
