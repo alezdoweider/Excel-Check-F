@@ -4,40 +4,44 @@ import pandas as pd
 # Configurar la página en modo ancho
 st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
 
-# Fondo negro, texto blanco y estilos para la tabla con autoajuste y bordes
+# Fondo azul cielo, texto verde oliva y estilos para la tabla con autoajuste y bordes
 st.markdown("""
 <style>
-body { background-color: black; color: white; }
-.stApp { background-color: black; color: white; }
-[data-testid="stSidebar"] { background-color: #222222; }
+body { 
+    background-color: #87CEEB;  /* Azul cielo */
+    color: #808000;  /* Verde oliva */
+}
+.stApp { 
+    background-color: #87CEEB;  /* Azul cielo */
+    color: #808000;  /* Verde oliva */
+}
+[data-testid="stSidebar"] { 
+    background-color: #222222; 
+}
 h1, h2, h3, h4, h5, h6, label, p, div, span {
-  color: white !important;
+    color: #808000 !important;  /* Verde oliva */
 }
 
 /* Estilos para la cuadrícula de la tabla */
 .table-cell {
-    border: 1px solid white;
+    border: 1px solid #808000;  /* Bordes en verde oliva */
     padding: 5px;
     text-align: center;
     word-wrap: break-word;
     white-space: normal;
 }
 .table-header {
-    border: 2px solid white;
+    border: 2px solid #808000;  /* Bordes en verde oliva */
     padding: 8px;
     font-weight: bold;
-    background-color: #444;
+    background-color: #444;  /* Fondo oscuro para las cabeceras */
     text-align: center;
     word-wrap: break-word;
     white-space: normal;
 }
-
-/* Establecer el ancho de la columna 'Nro. ID' en la columna F (índice 5) a 30px */
-.stDataFrame tbody tr td:nth-child(6) {
-    width: 30px !important;
-}
 </style>
 """, unsafe_allow_html=True)
+
 def main():
     st.title("Gestor de Casos (BlueStars)")
 
@@ -120,8 +124,10 @@ def main():
                     'NOMBRE',
                     'TIPO ENVASE'
                 ]
+                
+                # Mostrar la tabla final con un ajuste para la columna 'Nro. ID' (índice 5)
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
-                st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
+                st.write(df_filtrado[columnas_finales].to_string(index=False))
 
                 # Opción para descargar el DataFrame final como Excel
                 output = df_filtrado[columnas_finales].to_excel(index=False, engine='openpyxl')
