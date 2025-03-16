@@ -49,8 +49,8 @@ def main():
             df['CASO'] = df.iloc[:, 16].astype(str).apply(lambda x: x.split('-')[0])
             df['NUNC'] = df.iloc[:, 16].apply(lambda x: str(x).split('-')[1] if '-' in str(x) else '')
             df['NOMBRE'] = df.iloc[:, 10].astype(str)
-            df['ID'] = pd.to_numeric(df.iloc[:, 4], errors='coerce')
-            df['Nro ID'] = df.iloc[:, 5].astype(str)
+            df['ID'] = pd.to_numeric(df.iloc[:, 5], errors='coerce')
+            df['Nro ID'] = df.iloc[:, 6].astype(str)
             df['TIPO DE EMP'] = df.iloc[:, 7].astype(str)
 
             lista_casos = df['CASO'].dropna().unique().tolist()
