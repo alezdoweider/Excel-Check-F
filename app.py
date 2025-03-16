@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
-import io
 import openpyxl
+from io import BytesIO
 
 # Configurar la página en modo ancho
 st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
@@ -39,12 +39,13 @@ def main():
     uploaded_file = st.file_uploader("Sube el archivo Excel (.xlsm)", type=["xlsm"])
     if uploaded_file:
         try:
-            xls = pd.ExcelFile(uploaded_file, engine='openpyxl')
-            if 'ARMADRE' not in xls.sheet_names:
+            wb = openpyxl.load_workbook(uploaded_file, keep_vba=True)
+            if 'ARMADRE' not in wb.sheetnames:
                 st.error("La hoja 'ARMADRE' no se encuentra en el archivo.")
                 return
             
-            df = pd.read_excel(xls, sheet_name='ARMADRE')
+            ws = wb['ARMADRE']
+            df = pd.DataFrame(ws.values)
             st.success("Archivo cargado correctamente")
 
             df['CASO'] = df.iloc[:, 16].astype(str).apply(lambda x: x.split('-')[0])
@@ -79,28 +80,28 @@ def main():
                 custodio = st.text_input("Ingrese el CUSTODIO:")
 
                 if st.button("Guardar Información"):
-                    output = io.BytesIO()
-                    with pd.ExcelWriter(output, engine='openpyxl') as writer:
-                        df_filtrado[columnas_finales].to_excel(writer, index=False)
-                        wb = writer.book
-                        if 'HT' in wb.sheetnames:
-                            ws = wb['HT']
-                            ws['AA7'] = anio
-                            ws['AE7'] = mes
-                            ws['AG7'] = dia
-                            ws['AE11'] = custodio
-                        if 'LCH' in wb.sheetnames:
-                            ws = wb['LCH']
-                            ws['H9'] = custodio
+                    if 'HT' in wb.sheetnames:
+                        ws_ht = wb['HT']
+                        ws_ht['AA7'] = anio
+                        ws_ht['AE7'] = mes
+                        ws_ht['AG7'] = dia
+                        ws_ht['AE11'] = custodio
+                    if 'LCH' in wb.sheetnames:
+                        ws_lch = wb['LCH']
+                        ws_lch['H9'] = custodio
+                    
+                    # Guardar los cambios en el mismo archivo
+                    output = BytesIO()
+                    wb.save(output)
                     output.seek(0)
-                    st.success("Información guardada correctamente en el archivo Excel.")
-
-                st.download_button(
-                    label="Descargar tabla como Excel",
-                    data=output,
-                    file_name=f"CASO_{caso_seleccionado}_con_envases.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
+                    st.success("Información guardada correctamente en el archivo BlueStars.")
+                    
+                    st.download_button(
+                        label="Descargar archivo actualizado",
+                        data=output,
+                        file_name="BlueStars_actualizado.xlsm",
+                        mime="application/vnd.ms-excel.sheet.macroEnabled.12"
+                    )
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
