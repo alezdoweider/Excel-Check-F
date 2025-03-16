@@ -2,8 +2,11 @@ import pandas as pd
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 
+# Especificar la ruta completa al archivo Excel
+ruta_archivo = r"C:\Users\Saul Rada\Desktop\BlueStars\BlueStars.xlsm"
+
 # 1. Leer el archivo Excel .xlsm y la hoja ARMADRE
-df = pd.read_excel("BlueStars.xlsm", sheet_name="ARMADRE", engine="openpyxl")
+df = pd.read_excel(ruta_archivo, sheet_name="ARMADRE", engine="openpyxl")
 
 # 2. Extraer CASO y NUNC de la columna Q (antes y después del guion "-")
 df["CASO"] = df.iloc[:, 16].astype(str).str.split("-", n=1).str[0].str.strip()
@@ -20,11 +23,12 @@ columnas_interes = ["CASO", "NUNC", "NOMBRE", "ID EMP", "Nro. ID", "TIPO EMP"]
 df_procesado = df[columnas_interes].copy()
 
 # 5. Guardar en un nuevo archivo Excel sin el índice
-with pd.ExcelWriter("BlueStars_Procesado.xlsx", engine="openpyxl") as writer:
+nuevo_archivo = "BlueStars_Procesado.xlsx"
+with pd.ExcelWriter(nuevo_archivo, engine="openpyxl") as writer:
     df_procesado.to_excel(writer, sheet_name="Procesado", index=False)
 
 # 6. Aplicar formato con openpyxl
-workbook = load_workbook("BlueStars_Procesado.xlsx")
+workbook = load_workbook(nuevo_archivo)
 worksheet = workbook["Procesado"]
 
 # Definir estilos: fondo azul celeste y letra negra
@@ -37,8 +41,8 @@ for row in worksheet.iter_rows(min_row=1, max_row=worksheet.max_row, max_col=wor
         cell.fill = fill_color
         cell.font = font_color
 
-# Ajustar el ancho de la columna "Nro. ID" a 30 (columna E, 5ta columna)
+# Ajustar el ancho de la columna "Nro. ID" a 30 (la columna E, según se creó en el nuevo archivo)
 worksheet.column_dimensions['E'].width = 30
 
 # Guardar los cambios en el archivo Excel
-workbook.save("BlueStars_Procesado.xlsx")
+workbook.save(nuevo_archivo)
