@@ -1,78 +1,108 @@
 import streamlit as st
 import pandas as pd
-from datetime import datetime
-from login import create_table, register_user, login_user
-from io import BytesIO
 
-# Crear tabla de usuarios al inicio
-create_table()
+# Configurar la página en modo ancho
+st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
 
-# Interfaz de Login y Registro
-st.title("Login / Registro")
-menu = ["Login", "Registro"]
-choice = st.sidebar.selectbox("Menú", menu)
+# Fondo negro y texto blanco
+st.markdown("""
+<style>
+body { background-color: black; color: white; }
+.stApp { background-color: black; color: white; }
+[data-testid="stSidebar"] { background-color: #222222; }
+h1, h2, h3, h4, h5, h6, label, p, div, span {
+  color: white !important;
+}
+</style>
+""", unsafe_allow_html=True)
 
-if choice == "Login":
-    st.subheader("Iniciar Sesión")
-    usuario = st.text_input("Usuario")
-    password = st.text_input("Contraseña", type='password')
+def main():
+    st.title("Gestor de Casos (BlueStars)")
 
-    if st.button("Entrar"):
-        result = login_user(usuario, password)
-        if result:
-            st.success(f"Bienvenido {usuario}")
-            
-            # Subir archivo Excel
-            st.header("Buscar Caso en Excel")
-            uploaded_file = st.file_uploader("Cargar archivo Excel (.xlsm, .xlsx)", type=["xlsm", "xlsx"])
+    # Subir el archivo .xlsm
+    uploaded_file = st.file_uploader("Sube el archivo Excel (.xlsm)", type=["xlsm"])
+    if uploaded_file:
+        try:
+            # Leer la hoja ARMADRE
+            df = pd.read_excel(uploaded_file, sheet_name='ARMADRE', engine='openpyxl')
+            st.success("Archivo cargado correctamente")
 
-            if uploaded_file:
-                df = pd.read_excel(uploaded_file, sheet_name='ARMADARE')
-                st.success("Archivo cargado exitosamente")
-                
-                st.write("Vista previa de los datos:")
-                st.dataframe(df.head())
+            # ================================
+            # Extraer datos usando índices:
+            # ================================
+            # Columna Q (índice 16): CASO (todo el valor)
+            df['CASO'] = df.iloc[:, 16].astype(str)
 
-                # Procesamiento
-                st.header("Procesamiento de Datos")
-                fecha_actual = datetime.now().strftime("%d/%m/%Y")
-                st.write(f"Fecha actual: {fecha_actual}")
+            # También sacamos NUNC (lo que hay después del '-')
+            df['NUNC'] = df.iloc[:, 16].apply(
+                lambda x: str(x).split('-')[1] if '-' in str(x) else ''
+            )
 
-                df['Numero_Caso'] = df['Q'].astype(str).str.split('-').str[0]
-                df['NUNC'] = df['Q'].astype(str).str.split('-').str[1]
-                df['ID'] = df['E'].astype(str).str.split('/').str[0]
-                df['Numero_ID'] = df['E'].astype(str).str.extract(r'(\d+)')[0]
-                df['Numero_Antes_Slash'] = df['F']
-                df['Tipo_EMP'] = df['H']
-                df['EMPS'] = df['K']
+            # Columna E (índice 4): ID completo
+            df['ID'] = df.iloc[:, 4].astype(str)
+            # NÚMERO DEL ID (antes de '/')
+            df['NUMERO DEL ID'] = df['ID'].apply(
+                lambda x: x.split('/')[0] if '/' in x else x
+            )
 
-                tipo_envase = st.selectbox("Seleccione tipo de envase", ["TTG", "TTR", "TTL", "TTV", "FP", "BP"])
-                df['Tipo_Envase'] = tipo_envase
+            # Columna H (índice 7): TIPO DE EMP
+            df['TIPO DE EMP'] = df.iloc[:, 7].astype(str)
 
-                st.subheader("Resultados Procesados")
-                columnas_mostrar = ['Numero_Caso', 'NUNC', 'ID', 'Numero_ID', 'Numero_Antes_Slash', 'Tipo_EMP', 'EMPS', 'Tipo_Envase']
-                st.dataframe(df[columnas_mostrar].head())
+            # Columna K (índice 10): EMPs
+            df['EMPs'] = df.iloc[:, 10].astype(str)
 
-                # Descargar archivo procesado
-                output = BytesIO()
-                df.to_excel(output, index=False, engine='openpyxl')
-                st.download_button(
-                    label="Descargar Excel Procesado",
-                    data=output.getvalue(),
-                    file_name="procesado.xlsx",
-                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                )
-        else:
-            st.error("Usuario o contraseña incorrectos")
+            # Lista de CASOS
+            lista_casos = df['CASO'].dropna().unique().tolist()
+            if not lista_casos:
+                st.warning("No se encontraron valores en la columna Q para generar la lista de casos.")
+                return
 
-elif choice == "Registro":
-    st.subheader("Crear Cuenta")
-    usuario = st.text_input("Nuevo Usuario")
-    cedula = st.text_input("Cédula")
-    password = st.text_input("Nueva Contraseña", type='password')
+            # Seleccionar un CASO
+            caso_seleccionado = st.selectbox("Selecciona un CASO:", lista_casos)
+            if caso_seleccionado:
+                st.subheader(f"Información del CASO: {caso_seleccionado}")
+                # Filtrar el DataFrame
+                df_filtrado = df[df['CASO'] == caso_seleccionado].copy()
 
-    if st.button("Registrar"):
-        if register_user(usuario, cedula, password):
-            st.success("Usuario registrado exitosamente. Ahora puedes iniciar sesión.")
-        else:
-            st.error("Usuario ya existe. Intenta con otro.")
+                # Reseteamos el índice para iterar más fácilmente
+                df_filtrado.reset_index(drop=True, inplace=True)
+
+                st.write("### Selecciona un tipo de envase para cada fila:")
+                envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
+
+                # Creamos un selectbox por cada fila
+                for idx, row in df_filtrado.iterrows():
+                    # Si ya elegimos algo antes para esta fila, lo recordamos; si no, usamos la primera opción
+                    default_value = st.session_state.get(f"envase_{idx}", envase_options[0])
+                    chosen_envase = st.selectbox(
+                        f"Tipo de Envase (Fila {idx+1})",
+                        envase_options,
+                        key=f"envase_select_{idx}",
+                        index=envase_options.index(default_value) if default_value in envase_options else 0
+                    )
+                    # Guardamos la selección en session_state para persistir
+                    st.session_state[f"envase_{idx}"] = chosen_envase
+
+                # Ahora creamos la columna "TIPO ENVASE" en df_filtrado
+                df_filtrado["TIPO ENVASE"] = [
+                    st.session_state.get(f"envase_{idx}", envase_options[0]) for idx in df_filtrado.index
+                ]
+
+                # Columnas finales a mostrar
+                columnas_finales = [
+                    'CASO',
+                    'ID',
+                    'NUMERO DEL ID',
+                    'TIPO DE EMP',
+                    'NUNC',
+                    'EMPs',
+                    'TIPO ENVASE'
+                ]
+
+                st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
+
+        except Exception as e:
+            st.error(f"Error al leer el archivo: {e}")
+
+if __name__ == "__main__":
+    main()
