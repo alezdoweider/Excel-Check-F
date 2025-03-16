@@ -73,9 +73,9 @@ def main():
                 
                 # Asegurar que la columna 'TIPO DE ENVASE' exista antes de usarla
                 if 'TIPO DE ENVASE' not in df_filtrado.columns:
-                    df_filtrado['TIPO DE ENVASE'] = ""
+                    df_filtrado['TIPO DE ENVASE'] = envase_options[0]  # Asignar valor inicial
                 
-                # Convertir la columna 'TIPO DE ENVASE' en un dropdown dentro de la tabla
+                # Configurar la columna como lista desplegable
                 edited_df = st.data_editor(
                     df_filtrado,
                     column_config={
@@ -84,7 +84,8 @@ def main():
                             options=envase_options
                         )
                     },
-                    use_container_width=True
+                    use_container_width=True,
+                    num_rows="dynamic"
                 )
                 
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
@@ -120,4 +121,3 @@ def main():
             st.error(f"Error al leer el archivo: {e}")
 
 if __name__ == "__main__":
-    main()
