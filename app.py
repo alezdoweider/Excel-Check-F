@@ -71,11 +71,11 @@ def main():
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
                 
-                # Insertar la lista desplegable en la cuadrícula de la tabla
-                df_filtrado['TIPO DE ENVASE'] = [
-                    st.selectbox("Selecciona", envase_options, key=f"envase_{i}", index=0)
-                    for i in range(len(df_filtrado))
-                ]
+                # Mostrar la tabla con el selectbox dentro de la columna 'TIPO DE ENVASE'
+                for i in range(len(df_filtrado)):
+                    df_filtrado.at[i, 'TIPO DE ENVASE'] = st.selectbox(
+                        " ", envase_options, key=f"envase_{i}", index=0
+                    )
                 
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
