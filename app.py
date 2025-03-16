@@ -134,7 +134,7 @@ def main():
 if __name__ == "__main__":
     main()
 # Cargar el archivo Excel
-archivo = 'BlueStars.xlsx'  # Aquí pones la ruta de tu archivo
+archivo = 'BlueStars.xlsm'  # Aquí pones la ruta de tu archivo
 wb = openpyxl.load_workbook(archivo)
 
 # Seleccionar las hojas HT y LCH
