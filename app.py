@@ -1,51 +1,78 @@
 import streamlit as st
 import pandas as pd
-import subprocess
-import sys
+from datetime import datetime
+from login import create_table, register_user, login_user
 from io import BytesIO
 
-# Verificar e instalar dependencias automáticamente
-def instalar_dependencias():
-    paquetes = ["pandas", "openpyxl", "streamlit"]
-    for paquete in paquetes:
-        try:
-            __import__(paquete)
-        except ImportError:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", paquete])
+# Crear tabla de usuarios al inicio
+create_table()
 
-instalar_dependencias()
+# Interfaz de Login y Registro
+st.title("Login / Registro")
+menu = ["Login", "Registro"]
+choice = st.sidebar.selectbox("Menú", menu)
 
-def cargar_archivo(archivo):
-    global df, casos_disponibles
-    df = pd.read_excel(archivo, sheet_name="MATRIZ")
-    df.iloc[:, 16] = df.iloc[:, 16].astype(str).str.split(' - ').str[0]
-    df.iloc[:, 16] = pd.to_numeric(df.iloc[:, 16], errors='coerce')
-    df = df.dropna(subset=[df.columns[16]])
-    casos_disponibles = sorted(df.iloc[:, 16].astype(int).unique().tolist())
-    return casos_disponibles
+if choice == "Login":
+    st.subheader("Iniciar Sesión")
+    usuario = st.text_input("Usuario")
+    password = st.text_input("Contraseña", type='password')
 
-def buscar_caso(caso):
-    try:
-        caso = int(caso)
-        fila = df[df.iloc[:, 16] == caso]
-        
-        if fila.empty:
-            return "Caso no encontrado"
-        
-        valor_k = fila.iloc[0, 10]
-        valor_h = fila.iloc[0, 7]
-        valor_e = fila.iloc[0, 4]
-        
-        return f"K: {valor_k}\nH: {valor_h}\nE: {valor_e}"
-    except ValueError:
-        return "Seleccione un número válido"
+    if st.button("Entrar"):
+        result = login_user(usuario, password)
+        if result:
+            st.success(f"Bienvenido {usuario}")
+            
+            # Subir archivo Excel
+            st.header("Buscar Caso en Excel")
+            uploaded_file = st.file_uploader("Cargar archivo Excel (.xlsm, .xlsx)", type=["xlsm", "xlsx"])
 
-st.title("Buscar Caso en Excel")
-archivo = st.file_uploader("Cargar archivo Excel", type=["xlsm", "xlsx", "xls"])
+            if uploaded_file:
+                df = pd.read_excel(uploaded_file, sheet_name='ARMADARE')
+                st.success("Archivo cargado exitosamente")
+                
+                st.write("Vista previa de los datos:")
+                st.dataframe(df.head())
 
-if archivo is not None:
-    casos_disponibles = cargar_archivo(archivo)
-    caso_seleccionado = st.selectbox("Seleccione un número de caso", casos_disponibles)
-    if st.button("Buscar"):
-        resultado = buscar_caso(caso_seleccionado)
-        st.text_area("Resultado", resultado, height=100)
+                # Procesamiento
+                st.header("Procesamiento de Datos")
+                fecha_actual = datetime.now().strftime("%d/%m/%Y")
+                st.write(f"Fecha actual: {fecha_actual}")
+
+                df['Numero_Caso'] = df['Q'].astype(str).str.split('-').str[0]
+                df['NUNC'] = df['Q'].astype(str).str.split('-').str[1]
+                df['ID'] = df['E'].astype(str).str.split('/').str[0]
+                df['Numero_ID'] = df['E'].astype(str).str.extract(r'(\d+)')[0]
+                df['Numero_Antes_Slash'] = df['F']
+                df['Tipo_EMP'] = df['H']
+                df['EMPS'] = df['K']
+
+                tipo_envase = st.selectbox("Seleccione tipo de envase", ["TTG", "TTR", "TTL", "TTV", "FP", "BP"])
+                df['Tipo_Envase'] = tipo_envase
+
+                st.subheader("Resultados Procesados")
+                columnas_mostrar = ['Numero_Caso', 'NUNC', 'ID', 'Numero_ID', 'Numero_Antes_Slash', 'Tipo_EMP', 'EMPS', 'Tipo_Envase']
+                st.dataframe(df[columnas_mostrar].head())
+
+                # Descargar archivo procesado
+                output = BytesIO()
+                df.to_excel(output, index=False, engine='openpyxl')
+                st.download_button(
+                    label="Descargar Excel Procesado",
+                    data=output.getvalue(),
+                    file_name="procesado.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+        else:
+            st.error("Usuario o contraseña incorrectos")
+
+elif choice == "Registro":
+    st.subheader("Crear Cuenta")
+    usuario = st.text_input("Nuevo Usuario")
+    cedula = st.text_input("Cédula")
+    password = st.text_input("Nueva Contraseña", type='password')
+
+    if st.button("Registrar"):
+        if register_user(usuario, cedula, password):
+            st.success("Usuario registrado exitosamente. Ahora puedes iniciar sesión.")
+        else:
+            st.error("Usuario ya existe. Intenta con otro.")
