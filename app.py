@@ -34,7 +34,7 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
 
 /* Ajustar el ancho de la columna 'Nro. ID' */
 .stDataFrame tbody tr td:nth-child(3) {
-    width: 50px !important;  /* Ajusta el ancho de la columna 'Nro. ID' */
+    width: 30px !important;  /* Ajusta el ancho de la columna 'Nro. ID' */
 }
 </style>
 """, unsafe_allow_html=True)
