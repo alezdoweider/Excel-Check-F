@@ -38,8 +38,6 @@ h1, h2, h3, h4, h5, h6, label, p, div, span {
 }
 </style>
 """, unsafe_allow_html=True)
-.stDataFrame tbody tr td:nth-child(3) {
-    width: 30px !important;  /* Ajusta el ancho de la columna 'Nro. ID' */
 }
 
 def main():
