@@ -71,8 +71,11 @@ def main():
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
                 
+                # Asegurar que la columna 'TIPO DE ENVASE' exista antes de usarla
+                if 'TIPO DE ENVASE' not in df_filtrado.columns:
+                    df_filtrado['TIPO DE ENVASE'] = ""
+                
                 # Convertir la columna 'TIPO DE ENVASE' en un dropdown dentro de la tabla
-                df_filtrado['TIPO DE ENVASE'] = df_filtrado['TIPO DE ENVASE'].astype(str)
                 edited_df = st.data_editor(
                     df_filtrado,
                     column_config={
