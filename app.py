@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import openpyxl
-from io import BytesIO
 
 # Configurar la página en modo ancho
 st.set_page_config(page_title="Gestor de Casos (BlueStars)", layout="wide")
@@ -73,6 +72,11 @@ def main():
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
                 st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
 
+                # Ajustar ancho de la columna 'NRO ID'
+                if 'ARMADRE' in wb.sheetnames:
+                    ws_armadre = wb['ARMADRE']
+                    ws_armadre.column_dimensions['F'].width = 30
+
                 # Entradas de usuario adicionales
                 anio = st.text_input("Ingrese el AÑO:")
                 mes = st.text_input("Ingrese el MES:")
@@ -90,18 +94,8 @@ def main():
                         ws_lch = wb['LCH']
                         ws_lch['H9'] = custodio
                     
-                    # Guardar los cambios en el mismo archivo
-                    output = BytesIO()
-                    wb.save(output)
-                    output.seek(0)
+                    wb.save(uploaded_file)
                     st.success("Información guardada correctamente en el archivo BlueStars.")
-                    
-                    st.download_button(
-                        label="Descargar archivo actualizado",
-                        data=output,
-                        file_name="BlueStars_actualizado.xlsm",
-                        mime="application/vnd.ms-excel.sheet.macroEnabled.12"
-                    )
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
