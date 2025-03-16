@@ -55,23 +55,24 @@ def main():
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
                 
                 if 'TIPO DE ENVASE' not in df_filtrado.columns:
-                    df_filtrado['TIPO DE ENVASE'] = ""
+                    df_filtrado['TIPO DE ENVASE'] = envase_options[0]  # Asignar un valor por defecto
                 
-                # Insertar listas desplegables dentro de la tabla
-                tipo_envase_seleccionado = []
-                for idx, row in df_filtrado.iterrows():
-                    selected_envase = st.selectbox(
-                        "Selecciona el Tipo de Envase",
-                        envase_options,
-                        key=f"envase_{idx}"
-                    )
-                    tipo_envase_seleccionado.append(selected_envase)
-                
-                df_filtrado['TIPO DE ENVASE'] = tipo_envase_seleccionado
+                # Mostrar tabla editable con listas desplegables en la columna 'TIPO DE ENVASE'
+                edited_df = st.data_editor(
+                    df_filtrado,
+                    column_config={
+                        "TIPO DE ENVASE": st.column_config.SelectboxColumn(
+                            "TIPO DE ENVASE",
+                            options=envase_options
+                        )
+                    },
+                    use_container_width=True,
+                    num_rows="dynamic"
+                )
                 
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
-                st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
+                st.dataframe(edited_df[columnas_finales], use_container_width=True)
 
                 anio = st.text_input("Ingrese el AÑO:")
                 mes = st.text_input("Ingrese el MES:")
