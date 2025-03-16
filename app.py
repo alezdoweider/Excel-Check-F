@@ -1,12 +1,26 @@
 import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
 from openpyxl import load_workbook
 from openpyxl.styles import PatternFill, Font
 
-# Especificar la ruta completa al archivo Excel
-ruta_archivo = r"C:\Users\Saul Rada\Desktop\BlueStars\BlueStars.xlsm"
+# Iniciar y ocultar la ventana principal de tkinter
+root = tk.Tk()
+root.withdraw()
 
-# 1. Leer el archivo Excel .xlsm y la hoja ARMADRE
-df = pd.read_excel(ruta_archivo, sheet_name="ARMADRE", engine="openpyxl")
+# Abrir diálogo para seleccionar el archivo Excel
+file_path = filedialog.askopenfilename(
+    title="Selecciona el archivo BlueStars",
+    filetypes=[("Excel files", "*.xlsm *.xlsx")]
+)
+
+# Verificar si se seleccionó un archivo
+if not file_path:
+    print("No se seleccionó ningún archivo.")
+    exit()
+
+# 1. Leer el archivo Excel y la hoja ARMADRE
+df = pd.read_excel(file_path, sheet_name="ARMADRE", engine="openpyxl")
 
 # 2. Extraer CASO y NUNC de la columna Q (antes y después del guion "-")
 df["CASO"] = df.iloc[:, 16].astype(str).str.split("-", n=1).str[0].str.strip()
@@ -31,7 +45,7 @@ with pd.ExcelWriter(nuevo_archivo, engine="openpyxl") as writer:
 workbook = load_workbook(nuevo_archivo)
 worksheet = workbook["Procesado"]
 
-# Definir estilos: fondo azul celeste y letra negra
+# Definir estilos: fondo azul celeste y letras negras
 fill_color = PatternFill(start_color="ADD8E6", end_color="ADD8E6", fill_type="solid")
 font_color = Font(color="000000")
 
@@ -41,8 +55,9 @@ for row in worksheet.iter_rows(min_row=1, max_row=worksheet.max_row, max_col=wor
         cell.fill = fill_color
         cell.font = font_color
 
-# Ajustar el ancho de la columna "Nro. ID" a 30 (la columna E, según se creó en el nuevo archivo)
+# Ajustar el ancho de la columna "Nro. ID" a 30 (asumiendo que es la columna E en el nuevo archivo)
 worksheet.column_dimensions['E'].width = 30
 
 # Guardar los cambios en el archivo Excel
 workbook.save(nuevo_archivo)
+print("Archivo procesado y guardado como", nuevo_archivo)
