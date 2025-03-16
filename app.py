@@ -70,7 +70,12 @@ def main():
                 df_filtrado.reset_index(drop=True, inplace=True)
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
-                df_filtrado['TIPO DE ENVASE'] = [st.selectbox(" ", envase_options, key=f"envase_{i}") for i in range(len(df_filtrado))]
+                
+                # Insertar la lista desplegable en la cuadrícula de la tabla
+                df_filtrado['TIPO DE ENVASE'] = [
+                    st.selectbox("Selecciona", envase_options, key=f"envase_{i}", index=0)
+                    for i in range(len(df_filtrado))
+                ]
                 
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
@@ -98,19 +103,9 @@ def main():
                         ws_lch = wb['LCH']
                         ws_lch['H9'] = custodio
                     
-                    # Guardar los cambios en un nuevo archivo en memoria
-                    output_stream = io.BytesIO()
-                    wb.save(output_stream)
-                    output_stream.seek(0)
-                    
-                    # Permitir la descarga del archivo modificado
-                    st.download_button(
-                        label="Descargar archivo actualizado",
-                        data=output_stream,
-                        file_name="BlueStars_actualizado.xlsm",
-                        mime="application/vnd.ms-excel.sheet.macroEnabled.12"
-                    )
-                    st.success("Información guardada correctamente. Descarga el archivo actualizado.")
+                    # Guardar los cambios en el archivo original
+                    wb.save(file_stream)
+                    st.success("Información guardada correctamente en el archivo.")
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
