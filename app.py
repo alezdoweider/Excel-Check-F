@@ -41,7 +41,7 @@ def main():
             # ================================
             # Extraer datos usando índices:
             # ================================
-            df['CASO'] = df.iloc[:, 16].astype(str)
+            df['CASO'] = df.iloc[:, 16].astype(str).apply(lambda x: x.split('-')[0])  # Solo parte antes del guion
             df['NUNC'] = df.iloc[:, 16].apply(lambda x: str(x).split('-')[1] if '-' in str(x) else '')
             df['ID'] = df.iloc[:, 4].astype(str)
             df['NUMERO DEL ID'] = df['ID'].apply(lambda x: x.split('/')[0] if '/' in x else x)
