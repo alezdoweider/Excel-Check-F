@@ -138,8 +138,6 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
 # Cargar el archivo Excel
 archivo = 'BlueStars.xlsm'  # Aquí pones la ruta de tu archivo
 wb = openpyxl.load_workbook(archivo)
