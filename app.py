@@ -55,14 +55,14 @@ def main():
             # Columna E (índice 4): ID completo
             df['ID'] = df.iloc[:, 4].astype(str)
 
-            # Columna F (índice 5): NUMERO DEL ID (convertido a número)
+            # Columna F (índice 5): Nro. ID (convertido a número)
             df['Nro. ID'] = pd.to_numeric(df.iloc[:, 5], errors='coerce')
 
             # Columna H (índice 7): TIPO DE EMP
             df['TIPO DE EMP'] = df.iloc[:, 7].astype(str)
 
-            # Columna K (índice 10): EMPs
-            df['VICTIMA'] = df.iloc[:, 10].astype(str)
+            # Columna K (índice 10): NOMBRE
+            df['NOMBRE'] = df.iloc[:, 10].astype(str)
 
             # Lista de CASOS únicos (según la columna 'CASO')
             lista_casos = df['CASO'].dropna().unique().tolist()
@@ -81,7 +81,7 @@ def main():
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
 
                 # Definir encabezados de la tabla (más la columna de TIPO ENVASE)
-                columnas_mostrar = ['CASO', 'ID', 'NUMERO DEL ID', 'TIPO DE EMP', 'NUNC', 'EMPs']
+                columnas_mostrar = ['CASO', 'ID', 'Nro. ID', 'TIPO DE EMP', 'NUNC', 'NOMBRE']
                 num_columnas = len(columnas_mostrar) + 1  # +1 para "TIPO ENVASE"
 
                 # Mostrar encabezados con bordes
