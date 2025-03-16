@@ -133,3 +133,34 @@ def main():
 
 if __name__ == "__main__":
     main()
+# Cargar el archivo Excel
+archivo = 'BlueStars.xlsx'  # Aquí pones la ruta de tu archivo
+wb = openpyxl.load_workbook(archivo)
+
+# Seleccionar las hojas HT y LCH
+hoja_HT = wb['HT']
+hoja_LCH = wb['LCH']
+
+# Aquí defines el valor de AÑO, MES, DÍA y CUSTODIO (estos pueden ser ingresados por la interfaz)
+AÑO = 2025
+MES = 1
+DIA = 3
+CUSTODIO = "Juan Pérez"  # Ejemplo de valor para CUSTODIO
+
+# Formatear MES y DIA para tener siempre dos dígitos
+MES = str(MES).zfill(2)  # Asegura que MES tenga dos dígitos (ejemplo: 01)
+DIA = str(DIA).zfill(2)  # Asegura que DIA tenga dos dígitos (ejemplo: 03)
+
+# Asignar los valores de AÑO, MES y DÍA a las celdas correspondientes en la hoja HT
+hoja_HT['AA7'] = AÑO  # Celda AA7 para el AÑO
+hoja_HT['AE7'] = MES  # Celda AE7 para el MES
+hoja_HT['AG7'] = DIA  # Celda AG7 para el DÍA
+
+# Asignar el valor de CUSTODIO en las celdas correspondientes en HT y LCH
+hoja_HT['AE11'] = CUSTODIO  # Celda AE11 para CUSTODIO en la hoja HT
+hoja_LCH['Q6'] = CUSTODIO   # Celda Q6 para CUSTODIO en la hoja LCH
+
+# Guardar los cambios en el archivo
+wb.save(archivo)
+
+print("Los valores han sido guardados exitosamente.")
