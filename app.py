@@ -14,22 +14,6 @@ body { background-color: black; color: white; }
 h1, h2, h3, h4, h5, h6, label, p, div, span {
   color: white !important;
 }
-.table-cell {
-    border: 1px solid white;
-    padding: 5px;
-    text-align: center;
-    word-wrap: break-word;
-    white-space: normal;
-}
-.table-header {
-    border: 2px solid white;
-    padding: 8px;
-    font-weight: bold;
-    background-color: #444;
-    text-align: center;
-    word-wrap: break-word;
-    white-space: normal;
-}
 </style>
 """, unsafe_allow_html=True)
 
@@ -39,7 +23,6 @@ def main():
     uploaded_file = st.file_uploader("Sube el archivo Excel (.xlsm)", type=["xlsm"])
     if uploaded_file:
         try:
-            # Cargar el archivo en memoria para modificarlo
             file_stream = io.BytesIO(uploaded_file.getvalue())
             wb = openpyxl.load_workbook(file_stream, keep_vba=True)
             
@@ -71,33 +54,25 @@ def main():
                 
                 envase_options = ["TTG", "TTR", "TTL", "TTV", "FP", "BP"]
                 
-                # Asegurar que la columna 'TIPO DE ENVASE' exista antes de usarla
                 if 'TIPO DE ENVASE' not in df_filtrado.columns:
-                    df_filtrado['TIPO DE ENVASE'] = envase_options[0]  # Asignar valor inicial
+                    df_filtrado['TIPO DE ENVASE'] = ""
                 
-                # Configurar la columna como lista desplegable
-                edited_df = st.data_editor(
-                    df_filtrado,
-                    column_config={
-                        "TIPO DE ENVASE": st.column_config.SelectboxColumn(
-                            "TIPO DE ENVASE",
-                            options=envase_options
-                        )
-                    },
-                    use_container_width=True,
-                    num_rows="dynamic"
-                )
+                # Insertar listas desplegables dentro de la tabla
+                tipo_envase_seleccionado = []
+                for idx, row in df_filtrado.iterrows():
+                    selected_envase = st.selectbox(
+                        "Selecciona el Tipo de Envase",
+                        envase_options,
+                        key=f"envase_{idx}"
+                    )
+                    tipo_envase_seleccionado.append(selected_envase)
+                
+                df_filtrado['TIPO DE ENVASE'] = tipo_envase_seleccionado
                 
                 columnas_finales = ['CASO', 'NUNC', 'NOMBRE', 'ID', 'NRO ID', 'TIPO DE EMP', 'TIPO DE ENVASE']
                 st.write("### Resultado final con Tipo de Envase seleccionado:")
-                st.dataframe(edited_df[columnas_finales], use_container_width=True)
+                st.dataframe(df_filtrado[columnas_finales], use_container_width=True)
 
-                # Ajustar ancho de la columna 'NRO ID'
-                if 'ARMADRE' in wb.sheetnames:
-                    ws_armadre = wb['ARMADRE']
-                    ws_armadre.column_dimensions['F'].width = 30
-
-                # Entradas de usuario adicionales
                 anio = st.text_input("Ingrese el AÑO:")
                 mes = st.text_input("Ingrese el MES:")
                 dia = st.text_input("Ingrese el DÍA:")
@@ -114,11 +89,10 @@ def main():
                         ws_lch = wb['LCH']
                         ws_lch['H9'] = custodio
                     
-                    # Guardar los cambios en el archivo original
                     wb.save(file_stream)
                     st.success("Información guardada correctamente en el archivo.")
         except Exception as e:
             st.error(f"Error al leer el archivo: {e}")
 
 if __name__ == "__main__":
- main()
+    main()
